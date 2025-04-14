@@ -20,7 +20,7 @@ export default function Dummy() {
   return (
     
 <Box  marginLeft={"23%"} marginTop={"70px"} padding={"5px"} backgroundColor={"#2C2C2C"}>
-
+   
     <Box backgroundColor={"black"} borderRadius={"5px"} padding={"5px"}>
     <p style={{marginLeft:"50px", marginTop:"10px", fontFamily:"monospace", fontSize:"30px", fontWeight:"bolder", color:"white"}}>Spotify Playlist's</p>
 <Flex

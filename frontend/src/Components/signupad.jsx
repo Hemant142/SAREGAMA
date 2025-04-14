@@ -1,6 +1,6 @@
 import Cookies from "js-cookie";
 import React from "react";
-
+import "../Pages/css/navi.css"
 export default function Add() {
   const token = Cookies.get("login_token");
   console.log(token, "Token");
@@ -35,7 +35,7 @@ export default function Add() {
           >
             <div>
               <h3 style={{ fontWeight: "bolder" }}>PREVIEW OF SPOTIFY</h3>
-              <h5>
+              <h5 className="description">
                 Sign up for unlimited songs and podcasts with occasional ads. no
                 credit card needed
               </h5>

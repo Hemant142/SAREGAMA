@@ -11,6 +11,7 @@ import {
   USER_FAIL,
   VALID_USER_LOGOUT_SUCCESS,
 } from "../Redux/actionTypes";
+import "../Pages/css/navi.css"
 export default function Navbar({setSow}) {
   const token = Cookies.get("login_token");
   const name=Cookies.get("login_name")
@@ -120,7 +121,7 @@ let QueryParam={}
       </div>
       {!token?(// If not logged in
         <div style={{ display: "flex" }}>
-      <div style={{ display: "flex", margin: "10px" }}>
+      <div className="downloads" >
         <a
           style={{
             textDecoration: "none",

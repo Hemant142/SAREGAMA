@@ -1,0 +1,16 @@
+.downloads{
+    margin: 10px;
+    display: flex;
+}
+@media (max-width:400px) {
+    .downloads{
+        
+        display: none;
+    }
+    .description{
+        display: none;
+    }
+    .footer-com{
+        display: none;
+    }
+}

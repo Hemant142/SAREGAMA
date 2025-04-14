@@ -1,6 +1,7 @@
 import React from 'react'
 import { Flex } from '@chakra-ui/react'
 import "../Pages/css/home.css"
+import "../Pages/css/navi.css"
 export default function Footer() {
   return (
   <div id='footer'>
@@ -16,7 +17,7 @@ export default function Footer() {
 
 
 
-          <Flex direction={"column"}>
+          <Flex className='footer-com' direction={"column"}>
           <h5 style={{fontWeight:"bold"}}>Communities</h5>
           <p>For Artists</p>
           <p>Developers</p>
@@ -28,7 +29,7 @@ export default function Footer() {
           </Flex>   
 
 
-          <Flex direction={"column"}>
+          <Flex className='footer-com' direction={"column"}>
           <h5 style={{fontWeight:"bold"}}>Support</h5>
           <p>Free Mobile App</p>
           
