@@ -68,7 +68,7 @@ export default function Songs() {
   useEffect(()=>{
     let paramObj = {
       params: {
-        q: SearchPrarams.get("q"),
+        q: SearchPrarams.get("q")==null?"":SearchPrarams.get("q"),
       },
     };
     

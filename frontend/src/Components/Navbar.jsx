@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Input, InputGroup, InputLeftElement, Tooltip, useToast } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
 import { Link, useSearchParams } from "react-router-dom";
@@ -14,7 +14,7 @@ import {
 export default function Navbar({setSow}) {
   const token = Cookies.get("login_token");
   const name=Cookies.get("login_name")
-  console.log(name)
+ 
   const [SearchPrarams,setSeachParams]=useSearchParams();
   let initialSearch= SearchPrarams.get("q")
 const [q,setQuery] = useState(initialSearch||"")
@@ -24,20 +24,22 @@ const handleSearch=(e)=>{
    
 }
 
-const handleKeyPress=(e)=>{
-  if(e.key === 'Enter'){
-let QueryParam={}
- q&&(QueryParam.q=q)
- setSeachParams(QueryParam)
-  }
-}
+useEffect(() => {
+  const delayDebounceFn = setTimeout(() => {
+    let queryParam = {};
+    if (q) queryParam.q = q;
+    setSeachParams(queryParam);
+  }, 500); // Adjust debounce time (500ms is a good choice)
+
+  return () => clearTimeout(delayDebounceFn); // Cleanup previous timeout
+}, [q, setSeachParams]);
 
   const toast = useToast();
   const dispatch = useDispatch();
   const handleLogout = (e) => {
     e.preventDefault();
     dispatch(userlogout(token)).then((res) => {
-      console.log(res.data);
+  
       dispatch({ type: VALID_USER_LOGOUT_SUCCESS });
       if (res.data.msg === "User has been loggged out") {
         toast({
@@ -99,7 +101,7 @@ let QueryParam={}
           children={<SearchIcon color="gray.600" />}
           style={{ marginTop: "7px" }}
         />
-        <Input value={q} onKeyPress={handleKeyPress} onChange={handleSearch}
+        <Input value={q}  onChange={handleSearch}
           style={{
             width: "100%",
             borderRadius: "30px",

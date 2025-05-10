@@ -22,7 +22,7 @@ import signup_laptop from "../Components/images/signup_laptop.jpg";
 import signup_mobile from "../Components/images/signup_mobile.png";
 import logo from "../Components/images/logo.jpeg";
 import { USER_FAIL, USER_SIGNUP_SUCCESS } from "../Redux/actionTypes";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import "animate.css";
 import { Helmet } from "react-helmet";
@@ -44,9 +44,12 @@ import {
 
 import Cookies from "js-cookie";
 import { usersignup } from "../Redux/authReducer/action";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth } from "../GoogleAuth/firebase-config";
+import axios from "axios";
 
 export default function SignUp() {
-  const lock = <FontAwesomeIcon size="lg" icon={faLock} />;;
+  const lock = <FontAwesomeIcon size="lg" icon={faLock} />;
   const lock1 = <FontAwesomeIcon size="xs" icon={faLock} />;
   const user = <FontAwesomeIcon size="lg" icon={faUserCircle} />;
   const google = <FontAwesomeIcon size="lg" icon={faGoogle} />;
@@ -72,10 +75,13 @@ export default function SignUp() {
   const navigate = useNavigate();
   const toast = useToast();
   const dispatch = useDispatch();
+  const location = useLocation();
+
+  const apiUrl = process.env.REACT_APP_SAREGAMA_API_URL;
 
   const loading = useSelector((store) => store.authReducer.loading);
   //   const loading=false
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const dob = `${year}-${month}-${day}`;
     const payload = {
@@ -84,13 +90,12 @@ export default function SignUp() {
       dob,
     };
 
-    
-   await dispatch(usersignup(payload))
+    await dispatch(usersignup(payload))
       .then((res) => {
-        console.log(res.data,"Data");
+        console.log(res.data, "Data");
         dispatch({ type: USER_SIGNUP_SUCCESS });
 
-        if (res.data.msg=== "The new user has been registered") {
+        if (res.data.msg === "The new user has been registered") {
           setFormdata({ username: "", email: "", password: "" });
           setDay("");
           setGender("");
@@ -114,8 +119,7 @@ export default function SignUp() {
             duration: 3000,
             isClosable: true,
           });
-        } 
-        else {
+        } else {
           toast({
             title: `Registration failed Password should contain atlease one uppercase, one number and one special character`,
             status: "error",
@@ -126,7 +130,7 @@ export default function SignUp() {
         }
       })
       .catch((err) => {
-        console.log(err.message,"error")
+        console.log(err.message, "error");
         dispatch({ type: USER_FAIL });
         toast({
           title: `Something Went Wrong, Try again!!`,
@@ -138,6 +142,47 @@ export default function SignUp() {
       });
   };
 
+  const loginWithGoogle = async () => {
+    try {
+      // Force the user to select an account every time
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+
+      const result = await signInWithPopup(auth, provider);
+      const tokenId = await result.user.getIdToken(); // Get Google ID token
+
+      const response = await axios.post(`${apiUrl}/users/loginWithGoogle`, {
+        tokenId,
+      });
+
+      console.log(response, "response");
+      if (response.status === 200 || response.status === 201) {
+        Cookies.set("login_token", `${response.data.token}`, { expires: 7 });
+        Cookies.set("login_name", `${response.data.user.name}`, {
+          expires: 7,
+        });
+        Cookies.set("login_email", `${response.data.user.email}`, {
+          expires: 7,
+        });
+        toast({
+          title: `Welcome ${response.data.user.name}`,
+          position: "bottom",
+          status: "success",
+          duration: 2000,
+          isClosable: true,
+        });
+        setTimeout(() => {
+          if (location.state === null) {
+            navigate("/");
+          } else {
+            navigate(`${location.state}`, { replace: true });
+          }
+        }, 2000);
+      }
+    } catch (error) {
+      console.error("Google login failed:", error);
+    }
+  };
   return (
     <Flex
       justifyContent="space-between"
@@ -467,12 +512,27 @@ export default function SignUp() {
               </Flex>
               <br />
 
-              <Button
+              {/* <Button
                 leftIcon={google}
                 bg="#4285F4"
                 _hover={{ bg: "#4285F4" }}
                 color="white"
                 w="100%"
+              >
+                Sign up with Google
+              </Button> */}
+              <Button
+                leftIcon={google}
+                bg="#4285F4"
+                color="white"
+                w="100%"
+                border="2px solid #4285F4"
+                _hover={{
+                  bg: "transparent",
+                  color: "#4285F4",
+                }}
+                _focus={{ boxShadow: "none" }}
+                onClick={loginWithGoogle}
               >
                 Sign up with Google
               </Button>

@@ -31,8 +31,11 @@ import { USER_FAIL, USER_LOGIN_SUCCESS } from "../Redux/actionTypes";
 import Cookies from "js-cookie";
 import { userlogin } from "../Redux/authReducer/action";
 import { Helmet } from "react-helmet";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth } from "../GoogleAuth/firebase-config";
+import axios from "axios";
 export default function Login() {
-  const lock = <FontAwesomeIcon size="lg" icon={faLock} />;;
+  const lock = <FontAwesomeIcon size="lg" icon={faLock} />;
   const google = <FontAwesomeIcon size="lg" icon={faGoogle} />;
   const facebook = <FontAwesomeIcon size="lg" icon={faFacebook} />;
   const envelope = <FontAwesomeIcon size="lg" icon={faEnvelope} />;
@@ -48,77 +51,125 @@ export default function Login() {
   const dispatch = useDispatch();
   const loading = useSelector((store) => store.authReducer.loading);
   const location = useLocation();
- 
+
+  const apiUrl = process.env.REACT_APP_SAREGAMA_API_URL;
+
   const handleSubmit = (e) => {
-   
     e.preventDefault();
-    
-    dispatch(userlogin(formdata)).then((res)=>{
-      
-      dispatch({type:USER_LOGIN_SUCCESS})
-      
-      if(res.data.msg==="Login Successfull!"){
-         
-          setFormdata({email:"",password:""})
-          Cookies.set("login_token",`${res.data.token}`,{expires:7})
-          Cookies.set("login_name",`${res.data.existingUser.name}`,{expires:7})
-          Cookies.set("login_email",`${res.data.existingUser.email}`,{expires:7})
-          formdata.password==="admin"?Cookies.set("login_role","admin",{expires:7}):Cookies.set("login_role","user",{expires:7});
+
+    dispatch(userlogin(formdata))
+      .then((res) => {
+        dispatch({ type: USER_LOGIN_SUCCESS });
+
+        if (res.data.msg === "Login Successfull!") {
+          setFormdata({ email: "", password: "" });
+          Cookies.set("login_token", `${res.data.token}`, { expires: 7 });
+          Cookies.set("login_name", `${res.data.existingUser.name}`, {
+            expires: 7,
+          });
+          Cookies.set("login_email", `${res.data.existingUser.email}`, {
+            expires: 7,
+          });
+          formdata.password === "admin"
+            ? Cookies.set("login_role", "admin", { expires: 7 })
+            : Cookies.set("login_role", "user", { expires: 7 });
           toast({
-              title: `Welcome ${res.data.existingUser.name}`,
-              position: "bottom",
-              status: 'success',
-              duration: 2000,
-              isClosable: true,
-          })
+            title: `Welcome ${res.data.existingUser.name}`,
+            position: "bottom",
+            status: "success",
+            duration: 2000,
+            isClosable: true,
+          });
           setTimeout(() => {
-              if(location.state===null){
-                  navigate("/")
-              }else{
-                  navigate(`${location.state}`, {replace:true})
-              }
+            if (location.state === null) {
+              navigate("/");
+            } else {
+              navigate(`${location.state}`, { replace: true });
+            }
           }, 2000);
-      }else if(res.data.error==="Invalid Password!"){
+        } else if (res.data.error === "Invalid Password!") {
           toast({
-              title: `${res.data.error}`,
-              position: "bottom",
-              status: 'error',
-              duration: 3000,
-              isClosable: true,
-          })
-      }else if(res.data.error==="User Not Found!"){
+            title: `${res.data.error}`,
+            position: "bottom",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
+        } else if (res.data.error === "User Not Found!") {
           toast({
-              title: `${res.data.error}`,
-              position: "bottom",
-              status: 'error',
-              duration: 3000,
-              isClosable: true,
-          })
-      }else{
+            title: `${res.data.error}`,
+            position: "bottom",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
+        } else {
           toast({
-              title: `Something Went Wrong, Try again!!`,
-              status: 'error',
-              position: "bottom",
-              duration: 3000,
-              isClosable: true,
-          })
-      }
-      
-  }).catch((err)=>{
-      dispatch({type:USER_FAIL})
-      toast({
+            title: `Something Went Wrong, Try again!!`,
+            status: "error",
+            position: "bottom",
+            duration: 3000,
+            isClosable: true,
+          });
+        }
+      })
+      .catch((err) => {
+        dispatch({ type: USER_FAIL });
+        toast({
           title: `Something Went Wrong, Try again!!`,
-          status: 'error',
+          status: "error",
           position: "bottom",
           duration: 3000,
           isClosable: true,
-        })
-  })
+        });
+      });
   };
-  
+
   // if (token && name) {
   //   return <Navigate to="/" />;
   // }
+
+  const loginWithGoogle = async () => {
+    try {
+      // Force the user to select an account every time
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+
+      const result = await signInWithPopup(auth, provider);
+      const tokenId = await result.user.getIdToken(); // Get Google ID token
+
+      const response = await axios.post(`${apiUrl}/users/loginWithGoogle`, {
+        tokenId,
+      });
+
+      console.log(response, "response");
+      if (response.status === 200 || response.status === 201) {
+        Cookies.set("login_token", `${response.data.token}`, { expires: 7 });
+        Cookies.set("login_name", `${response.data.user.name}`, {
+          expires: 7,
+        });
+        Cookies.set("login_email", `${response.data.user.email}`, {
+          expires: 7,
+        });
+        toast({
+          title: `Welcome ${response.data.user.name}`,
+          position: "bottom",
+          status: "success",
+          duration: 2000,
+          isClosable: true,
+        });
+        setTimeout(() => {
+          if (location.state === null) {
+            navigate("/");
+          } else {
+            navigate(`${location.state}`, { replace: true });
+          }
+        }, 2000);
+      }
+    } catch (error) {
+      console.error("Google login failed:", error);
+    }
+  };
   return (
     <Flex
       justifyContent="space-between"
@@ -316,9 +367,15 @@ export default function Login() {
               <Button
                 leftIcon={google}
                 bg="#4285F4"
-                _hover={{ bg: "#4285F4" }}
                 color="white"
                 w="100%"
+                border="2px solid #4285F4"
+                _hover={{
+                  bg: "transparent",
+                  color: "#4285F4",
+                }}
+                _focus={{ boxShadow: "none" }}
+                onClick={loginWithGoogle}
               >
                 Log in with Google
               </Button>
