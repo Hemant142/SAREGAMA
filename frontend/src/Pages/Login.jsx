@@ -31,7 +31,12 @@ import { USER_FAIL, USER_LOGIN_SUCCESS } from "../Redux/actionTypes";
 import Cookies from "js-cookie";
 import { userlogin } from "../Redux/authReducer/action";
 import { Helmet } from "react-helmet";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  getRedirectResult,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+} from "firebase/auth";
 import { auth } from "../GoogleAuth/firebase-config";
 import axios from "axios";
 export default function Login() {
@@ -125,51 +130,108 @@ export default function Login() {
       });
   };
 
-  // if (token && name) {
-  //   return <Navigate to="/" />;
-  // }
-
   const loginWithGoogle = async () => {
-    try {
-      // Force the user to select an account every time
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: "select_account" });
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+    await signInWithRedirect(auth, provider); // triggers Google login redirect
+  };
 
-      const result = await signInWithPopup(auth, provider);
-      const tokenId = await result.user.getIdToken(); // Get Google ID token
+  // Call this after redirect completes
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result?.user) {
+          const tokenId = await result.user.getIdToken();
 
-      const response = await axios.post(`${apiUrl}/users/loginWithGoogle`, {
-        tokenId,
-      });
+          const response = await axios.post(`${apiUrl}/users/loginWithGoogle`, {
+            tokenId,
+          });
 
-      console.log(response, "response");
-      if (response.status === 200 || response.status === 201) {
-        Cookies.set("login_token", `${response.data.token}`, { expires: 7 });
-        Cookies.set("login_name", `${response.data.user.name}`, {
-          expires: 7,
-        });
-        Cookies.set("login_email", `${response.data.user.email}`, {
-          expires: 7,
-        });
+          if (response.status === 200 || response.status === 201) {
+            Cookies.set("login_token", `${response.data.token}`, {
+              expires: 7,
+            });
+            Cookies.set("login_name", `${response.data.user.name}`, {
+              expires: 7,
+            });
+            Cookies.set("login_email", `${response.data.user.email}`, {
+              expires: 7,
+            });
+
+            toast({
+              title: `Welcome ${response.data.user.name}`,
+              position: "bottom",
+              status: "success",
+              duration: 2000,
+              isClosable: true,
+            });
+
+            setTimeout(() => {
+              if (location.state === null) {
+                navigate("/");
+              } else {
+                navigate(`${location.state}`, { replace: true });
+              }
+            }, 2000);
+          }
+        }
+      } catch (error) {
+        console.error("Google login failed:", error.message);
         toast({
-          title: `Welcome ${response.data.user.name}`,
-          position: "bottom",
-          status: "success",
-          duration: 2000,
+          title: "Login failed",
+          description: "Please try again later",
+          status: "error",
+          duration: 3000,
           isClosable: true,
         });
-        setTimeout(() => {
-          if (location.state === null) {
-            navigate("/");
-          } else {
-            navigate(`${location.state}`, { replace: true });
-          }
-        }, 2000);
       }
-    } catch (error) {
-      console.error("Google login failed:", error);
-    }
-  };
+    };
+
+    handleRedirectResult();
+  }, [navigate, location.state, toast]);
+
+  // const loginWithGoogle = async () => {
+  //   try {
+  //     // Force the user to select an account every time
+  //     const provider = new GoogleAuthProvider();
+  //     provider.setCustomParameters({ prompt: "select_account" });
+
+  //     const result = await signInWithPopup(auth, provider);
+  //     const tokenId = await result.user.getIdToken(); // Get Google ID token
+
+  //     const response = await axios.post(`${apiUrl}/users/loginWithGoogle`, {
+  //       tokenId,
+  //     });
+
+  //     console.log(response, "response");
+  //     if (response.status === 200 || response.status === 201) {
+  //       Cookies.set("login_token", `${response.data.token}`, { expires: 7 });
+  //       Cookies.set("login_name", `${response.data.user.name}`, {
+  //         expires: 7,
+  //       });
+  //       Cookies.set("login_email", `${response.data.user.email}`, {
+  //         expires: 7,
+  //       });
+  //       toast({
+  //         title: `Welcome ${response.data.user.name}`,
+  //         position: "bottom",
+  //         status: "success",
+  //         duration: 2000,
+  //         isClosable: true,
+  //       });
+  //       setTimeout(() => {
+  //         if (location.state === null) {
+  //           navigate("/");
+  //         } else {
+  //           navigate(`${location.state}`, { replace: true });
+  //         }
+  //       }, 2000);
+  //     }
+  //   } catch (error) {
+  //     console.error("Google login failed:", error);
+  //   }
+  // };
   return (
     <Flex
       justifyContent="space-between"
@@ -275,6 +337,7 @@ export default function Login() {
                 <InputRightElement
                   cursor="pointer"
                   onClick={() => setShow(!show)}
+                  aria-label="Toggle password visibility"
                 >
                   {show ? eye : closeye}
                 </InputRightElement>
