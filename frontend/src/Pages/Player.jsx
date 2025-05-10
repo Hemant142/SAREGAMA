@@ -10,9 +10,9 @@ import { HiSpeakerWave } from "react-icons/hi2";
 import axios from "axios";
 import styled from "styled-components";
 import { useLocation, useSearchParams } from "react-router-dom";
-const Player = ({index,songs}) => {
+const Player = ({ index, songs }) => {
   // const [songs, setSongs] = useState(data);
-  
+
   // const [songs, setSongs] = useState([]);
   const [currentSongIndex, setCurrentSongIndex] = useState(index);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -21,10 +21,10 @@ const Player = ({index,songs}) => {
   const [volume, setVolume] = useState(1); // State to track volume (1 is full volume)
   const [isVolumeControlVisible, setVolumeControlVisible] = useState(false); // State to show/hide volume control pop-up
   const audioRef = useRef(null);
-   const [SearchPrarams,setSeachParams]=useSearchParams();
-   const location= useLocation()
-// console.log(index,"index")
-// console.log({currentSongIndex,songs})
+  const [SearchPrarams, setSeachParams] = useSearchParams();
+  const location = useLocation();
+  // console.log(index,"index")
+  // console.log({currentSongIndex,songs})
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
@@ -35,7 +35,6 @@ const Player = ({index,songs}) => {
   };
 
   const playSong = () => {
-   
     audioRef.current.src = songs[currentSongIndex].audio;
 
     audioRef.current.addEventListener("loadedmetadata", () => {
@@ -81,19 +80,16 @@ const Player = ({index,songs}) => {
     }
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     // setIsPlaying(true)
-    
-        setCurrentSongIndex(index)
-    
-   
-  },[index])
+
+    setCurrentSongIndex(index);
+  }, [index]);
 
   useEffect(() => {
     if (isPlaying) {
       playSong();
     }
-   
   }, [currentSongIndex]);
 
   useEffect(() => {
@@ -131,24 +127,21 @@ const Player = ({index,songs}) => {
     audioRef.current.volume = newVolume;
   };
 
-
-
   return (
-
-    <DIV className="song-container" style={{marginTop:"20px"}}>
+    <DIV className="song-container" style={{ marginTop: "20px" }}>
       {songs.length > 0 ? (
         <div className="topdiv">
-          <div style={{display:"flex"}}>
-            
-           
+          <div style={{ display: "flex" }}>
             <img
               src={songs[currentSongIndex].avatar}
               alt="Song Avatar"
               width={200}
               height={100}
-              style={{marginRight:"10px"}}
+              style={{ marginRight: "10px" }}
             />
-             <h1 style={{marginRight:"10px"}}>{songs[currentSongIndex].title}</h1>
+            <h1 style={{ marginRight: "10px" }}>
+              {songs[currentSongIndex].title}
+            </h1>
             <audio
               id="audio"
               controls
@@ -161,11 +154,9 @@ const Player = ({index,songs}) => {
             <button className="nav-button" onClick={previousSong}>
               <BiSkipPrevious />
             </button>
-            <button onClick={rewindSong}  className="Arrow">
+            <button onClick={rewindSong} className="Arrow">
               <PiArrowArcLeftDuotone />
-              
               10
-             
             </button>
             {isPlaying ? (
               <button className="play-button" onClick={stopSong}>
@@ -178,9 +169,7 @@ const Player = ({index,songs}) => {
             )}
             <button onClick={fastForwardSong}>
               <PiArrowArcRightDuotone />
-              
               10
-             
             </button>
             <button className="nav-button" onClick={nextSong}>
               <BiSkipNext />
@@ -211,8 +200,6 @@ const Player = ({index,songs}) => {
                 onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
               />
             </div>
-
-            
           </div>
         </div>
       ) : (
@@ -235,40 +222,46 @@ const Player = ({index,songs}) => {
   );
 };
 
-const DIV=styled.div`
-    text-align: center;
-    background:linear-gradient(90deg, rgba(246,0,203,1) 0%, rgba(0,212,255,1) 100%, rgba(0,234,247,1) 100%);   padding: 0px 20px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-    background-color: #0000009b;
-    /* width: 98%;
+const DIV = styled.div`
+  text-align: center;
+  background: linear-gradient(
+    90deg,
+    rgba(246, 0, 203, 1) 0%,
+    rgba(0, 212, 255, 1) 100%,
+    rgba(0, 234, 247, 1) 100%
+  );
+  padding: 0px 20px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  background-color: #0000009b;
+  /* width: 98%;
     margin: auto; */
 
-    .topdiv{
+  .topdiv {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
   }
-  
+
   h1 {
     font-size: 15px;
     margin-bottom: 10px;
     color: white;
   }
-  
+
   img {
     width: 40px;
     height: 40px;
     object-fit: cover;
   }
-  
+
   .audio-controls {
     display: flex;
     flex-direction: column;
     align-items: center;
     margin-top: 20px;
   }
-  
+
   button {
     /* background-color: black; */
     border: none;
@@ -277,20 +270,19 @@ const DIV=styled.div`
     font-size: 18px;
     color: white;
     cursor: pointer;
-    
+
     margin: 10px;
     /* display: flex; */
     flex-direction: column;
   }
-  
-  .heading-image{
+
+  .heading-image {
     display: "flex";
   }
   .nav-button {
     font-size: 30px;
   }
-  
-  
+
   .time-length {
     display: flex;
     justify-content: space-between;
@@ -301,50 +293,47 @@ const DIV=styled.div`
     margin: 0 auto;
     width: 200px;
   }
-  
+
   #current-time,
   #duration {
     color: white;
   }
-  
-  .range{
+
+  .range {
     width: 100%;
     color: black;
   }
-  
+
   audio {
     display: none;
   }
-  
-  .button-container{
+
+  .button-container {
     display: flex;
     align-items: center;
   }
-  
-  .audio-Voulme{
+
+  .audio-Voulme {
     color: white;
     display: flex;
     justify-content: center;
     align-items: center;
   }
-  
-  .volume-control-popup>input{
+
+  .volume-control-popup > input {
     width: 70px;
   }
-  .volume-button{
+  .volume-button {
     width: 0px;
     margin-right: 20px;
   }
-  
-  .volume{
+
+  .volume {
     height: 43px;
   }
-  .progress-container{
-    display:flex;
+  .progress-container {
+    display: flex;
   }
-
-`
-
-
+`;
 
 export default Player;

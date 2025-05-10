@@ -52,7 +52,7 @@ export default function Songs() {
   );
 
   const [index, setIndex] = useState(0);
-  const songs=useSelector(state=>state.FavoriteSongReducer.songs)
+  const songs = useSelector((state) => state.FavoriteSongReducer.songs);
 
   // console.log({index,songs})
   // let URL = `https://worried-colt-train.cyclic.app/songs/`;
@@ -65,16 +65,16 @@ export default function Songs() {
   //       console.log({ err });
   //     });
   // };
-  useEffect(()=>{
+  useEffect(() => {
     let paramObj = {
       params: {
-        q: SearchPrarams.get("q")==null?"":SearchPrarams.get("q"),
+        q: SearchPrarams.get("q") == null ? "" : SearchPrarams.get("q"),
       },
     };
-    
-    dispatch(fetchSongs(paramObj,token));
-    dispatch(GetAllFavoriteSong(paramObj,token))
-  },[token,location])
+
+    dispatch(fetchSongs(paramObj, token));
+    dispatch(GetAllFavoriteSong(paramObj, token));
+  }, [token, location]);
 
   // useEffect(() => {
   //   let paramObj = {
@@ -119,8 +119,8 @@ export default function Songs() {
     }
 
     if (bag) {
-      dispatch(AddFavoriteSong(SongDetails,token)).then((res) => {
-        dispatch(GetAllFavoriteSong('te',token));
+      dispatch(AddFavoriteSong(SongDetails, token)).then((res) => {
+        dispatch(GetAllFavoriteSong("te", token));
 
         toast({
           title: `You like this song`,
@@ -136,9 +136,9 @@ export default function Songs() {
         JSON.stringify([...likedSongs, item._id])
       );
     } else {
-      dispatch(DeletFavoriteSong(item._id,token)).then((res) => {
+      dispatch(DeletFavoriteSong(item._id, token)).then((res) => {
         console.log({ res });
-        dispatch(GetAllFavoriteSong("t",token));
+        dispatch(GetAllFavoriteSong("t", token));
         toast({
           title: `You dislike this song`,
           position: "bottom",
@@ -169,19 +169,24 @@ export default function Songs() {
   return (
     <>
       <div>
-        <div style={{ display: "flex", width: "100%",height:"100%" ,backgroundColor:"#0000009b;" }}>
+        <div
+          style={{
+            display: "flex",
+            width: "100%",
+            height: "100%",
+            backgroundColor: "#0000009b",
+          }}
+        >
           <div id="sidebar" style={{ height: "100%" }}>
             <Sidebar />
           </div>
 
-
           <div
             style={{
-               left: "23%",
+              left: "23%",
               width: "77%",
               position: "fixed",
               zIndex: "2",
-             
             }}
           >
             <Navbar />
@@ -193,13 +198,12 @@ export default function Songs() {
             padding={"5px"}
             backgroundColor={"#2C2C2C"}
             zIndex={"0"}
-          
             id="songs"
           >
             <SimpleGrid columns={columns} spacing={10}>
               {songs.length > 0 ? (
                 songs.map((ele, index) => (
-                  <Box className="hover" marginBottom={2}>
+                  <Box className="hover" marginBottom={2} key={ele._id}>
                     <Box
                       backgroundColor={"black"}
                       color={"white"}
@@ -221,7 +225,7 @@ export default function Songs() {
                       <Text paddingLeft={2}>{ele.artist}</Text>
                     </Box>
 
-                    <Box >
+                    <Box>
                       <Button
                         className="hover-button"
                         borderRadius={"50%"}
@@ -238,7 +242,7 @@ export default function Songs() {
                       <button
                         className={`like-button `}
                         // borderRadius={"50%"}
-                        
+
                         // display={"none"}
 
                         // color={"white"}
@@ -252,15 +256,22 @@ export default function Songs() {
                           }`}
                         /> */}
                         <FontAwesomeIcon
-  icon={faHeart}
-  className={`like-icon ${
-    FavoriteSongData.some((fav)=>fav.songId==ele._id) ? "liked" : "unliked"
-  }`}
-  style={{
-    color: FavoriteSongData.some((fav)=>fav.songId==ele._id) ? "red" : "white",
- 
-  }}
-/>
+                          icon={faHeart}
+                          className={`like-icon ${
+                            FavoriteSongData.some(
+                              (fav) => fav.songId == ele._id
+                            )
+                              ? "liked"
+                              : "unliked"
+                          }`}
+                          style={{
+                            color: FavoriteSongData.some(
+                              (fav) => fav.songId == ele._id
+                            )
+                              ? "red"
+                              : "white",
+                          }}
+                        />
 
                         {/* Like */}
                       </button>
@@ -268,7 +279,6 @@ export default function Songs() {
                   </Box>
                 ))
               ) : (
-
                 <Box width={1100}>
                   {" "}
                   <div className="loader">
@@ -276,14 +286,20 @@ export default function Songs() {
                   </div>
                   :
                 </Box>
-
               )}
             </SimpleGrid>
           </Box>
         </div>
 
         <Footer />
-        <div style={{ position: "fixed", bottom: 0,width: "100%", backgroundColor:"#0000009b;" }}>
+        <div
+          style={{
+            position: "fixed",
+            bottom: 0,
+            width: "100%",
+            backgroundColor: "#0000009b",
+          }}
+        >
           {token ? (
             <Player index={index} songs={songs} />
           ) : (
