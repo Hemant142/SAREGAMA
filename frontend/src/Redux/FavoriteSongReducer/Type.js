@@ -88,7 +88,7 @@ export const DeletFavoriteSong=(id,token)=>async dispatch=>{
       console.log(paramObj, "paramObj"); // Log the paramObj for debugging
       try {
         // Ensure paramObj is passed under the 'params' key
-        const response = await axios.get(`http://localhost:8080/songs?q=${paramObj.params.q}`);
+        const response = await axios.get(`${apiUrl}/songs?q=${paramObj.params.q}`);
     console.log(response,"response")
         // Dispatch success action with the fetched songs
         dispatch({ type: SONG_REQUEST_SUCCESS, payload: response.data.data });
